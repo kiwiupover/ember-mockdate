@@ -1,50 +1,108 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    # filtering branches here prevents duplicate builds from pull_request and push
     branches:
       - main
-      - 'v*'
-    # always run CI for tags
     tags:
       - '*'
-
-  # early issue detection: run CI weekly on Sundays
+  pull_request:
   schedule:
-    - cron: '0 6 * * 0'
-
-env:
-  CI: true
+    - cron: '0 4 * * 5' # Fridays at 4am
 
 jobs:
-  test-locked-deps:
-    name: Locked Deps
+  dependencies:
+    name: Install dependencies
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2.3.4
-      - name: Install Node
-        uses: volta-cli/action@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v2
         with:
-          node-version: 14
-      - name: Install Dependencies
-        run: yarn install --frozen-lockfile
-      - name: lint:js
-        run: yarn lint:js
-      - name: lint:hbs
+          node-version: '14.x'
+
+      - name: Use Yarn cache
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-yarn-14.x-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-14.x
+      - run: yarn install --frozen-lockfile
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+
+  lint:
+    needs: dependencies
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+
+      - name: Use Yarn cache
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-yarn-14.x-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-14.x
+      - name: ESLint
+        uses: wearerequired/lint-action@v1
+        with:
+          eslint: true
+          prettier: true
+          prettier_extensions: 'css,hbs'
+          auto_fix: true
+          git_email: engineering@auditboard.com
+
+      - name: Ember Template Lint
         run: yarn lint:hbs
-      - name: Browser Tests
-        run: yarn test
+
+  test:
+    needs: dependencies
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+
+      - name: Use Yarn cache
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-yarn-14.x-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-14.x
+      - name: Run tests
+        run: yarn test:ember
 
   test-try:
-    name: Ember Try
+    name: Scenario Tests
     runs-on: ubuntu-latest
-    needs: [test-locked-deps]
-    continue-on-error: ${{ matrix.experimental }}
+    timeout-minutes: 5
+    continue-on-error: ${{ matrix.allow-failure || false }}
+    needs:
+      - test
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         scenario:
           - ember-lts-3.16
@@ -56,18 +114,27 @@ jobs:
           - ember-classic
           - embroider-safe
           - embroider-optimized
-        experimental: [false]
+        allow-failure: [false]
         include:
           - scenario: ember-canary
-            experimental: true
+            allow-failure: true
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2.3.4
-      - name: Install Node
-        uses: volta-cli/action@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v2
         with:
-          node-version: 14
-      - name: Install Dependencies
-        run: yarn install --frozen-lockfile
-      - name: Try Scenario
+          node-version: '14.x'
+
+      - name: Use Yarn cache
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-yarn-14.x-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-14.x
+      - name: Test
         run: yarn ember try:one ${{ matrix.scenario }}
+
