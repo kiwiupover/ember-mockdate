@@ -62,9 +62,6 @@ jobs:
         with:
           eslint: true
           prettier: true
-          prettier_extensions: 'css,hbs'
-          auto_fix: true
-          git_email: engineering@auditboard.com
 
       - name: Ember Template Lint
         run: yarn lint:hbs
