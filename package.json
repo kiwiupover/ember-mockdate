@@ -1,15 +1,14 @@
 {
   "name": "ember-mockdate",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "1.0.0-beta.1",
+  "description": "MockDate within your Ember application",
   "keywords": [
     "ember-addon"
   ],
-  "repository": "",
+  "repository": "https://github.com/kiwiupover/ember-mockdate",
   "license": "MIT",
-  "author": "",
+  "author": "Dave Laird",
   "directories": {
-    "doc": "doc",
     "test": "tests"
   },
   "scripts": {
