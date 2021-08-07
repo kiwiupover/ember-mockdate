@@ -22,16 +22,16 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: '16.x'
 
       - name: Use Yarn cache
         uses: actions/cache@v2
         id: yarn-cache
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-14.x-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-16.x-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-14.x
+            ${{ runner.os }}-yarn-16.x
       - run: yarn install --frozen-lockfile
         if: steps.yarn-cache.outputs.cache-hit != 'true'
 
@@ -47,16 +47,16 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: '16.x'
 
       - name: Use Yarn cache
         uses: actions/cache@v2
         id: yarn-cache
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-14.x-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-16.x-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-14.x
+            ${{ runner.os }}-yarn-16.x
       - name: ESLint
         uses: wearerequired/lint-action@v1
         with:
@@ -78,16 +78,16 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: '16.x'
 
       - name: Use Yarn cache
         uses: actions/cache@v2
         id: yarn-cache
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-14.x-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-16.x-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-14.x
+            ${{ runner.os }}-yarn-16.x
       - name: Run tests
         run: yarn test:ember
 
@@ -122,15 +122,15 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: '16.x'
 
       - name: Use Yarn cache
         uses: actions/cache@v2
         id: yarn-cache
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-14.x-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-16.x-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-14.x
+            ${{ runner.os }}-yarn-16.x
       - name: Test
         run: yarn ember try:one ${{ matrix.scenario }}
