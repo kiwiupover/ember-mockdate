@@ -134,4 +134,3 @@ jobs:
             ${{ runner.os }}-yarn-14.x
       - name: Test
         run: yarn ember try:one ${{ matrix.scenario }}
-
