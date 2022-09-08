@@ -1,9 +1,14 @@
-import { run } from '@ember/runloop';
-import { trySet } from '@ember/object';
-import { set, reset } from 'mockdate';
+import MockDate from 'mockdate';
+
+import { _backburner } from '@ember/runloop';
 
 const originalDate = Date;
-const originalPlatformNow = run.backburner._platform.now;
+const originalPlatformNow = _backburner._platform.now;
+
+const { set, reset } = MockDate || {
+  set() {},
+  reset() {},
+};
 
 /*
  * The backburner.js _platform.now function must be overridden when using this
@@ -14,12 +19,12 @@ const originalPlatformNow = run.backburner._platform.now;
  * https://github.com/BackburnerJS/backburner.js/pull/264
  */
 const freezeDateAt = (...args) => {
-  trySet(run, 'backburner._platform.now', () => originalDate());
+  _backburner._platform.now = originalDate.now;
   set(args);
 };
 
 const unfreezeDate = (...args) => {
-  trySet(run, 'backburner._platform.now', originalPlatformNow);
+  _backburner._platform.now = originalPlatformNow;
   reset(args);
 };
 
